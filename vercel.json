@@ -2,5 +2,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/client",
   "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://trendywoods.chanduyadav1515.workers.dev/api/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
