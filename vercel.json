@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://trendywoods.chanduyadav1515.workers.dev/api/:path*"
+      "destination": "https://trendywoods.websitebuilder15151.workers.dev/api/:path*"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
