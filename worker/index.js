@@ -1,4 +1,4 @@
-const CATEGORIES = new Set(['sofas', 'beds', 'cots', 'cushion-cots', 'dining', 'chairs'])
+const CATEGORIES = new Set(['sofas', 'cots', 'cushion-cots', 'dining'])
 const MAX_BYTES = 8 * 1024 * 1024
 const CATALOG_KEY = 'catalog.json'
 
