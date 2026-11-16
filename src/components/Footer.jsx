@@ -7,7 +7,7 @@ export function Footer({ onAdmin }) {
     <footer className="footer">
       <div className="container footer-grid">
         <div>
-          <Logo light />
+          <Logo />
           <p>Sofas, cots, cushioning cots, and dining tables.</p>
         </div>
         <div>
