@@ -6,7 +6,7 @@ export function Hero({ onEnquire, onBrowse }) {
     <section className="hero">
       <div className="hero-copy">
         <p className="eyebrow">Furniture showroom</p>
-        <h1>Sofas, beds, and tables with a quieter kind of style.</h1>
+        <h1>Sofas, cots, and tables with a quieter kind of style.</h1>
         <p className="hero-lead">
           Solid wood and upholstered pieces you can sit with in the showroom.
           Ask about a size, a fabric, or a delivery date on WhatsApp.

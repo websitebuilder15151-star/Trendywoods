@@ -1,7 +1,7 @@
 import './About.css'
 
 const notes = [
-  { title: 'Sit before you decide', copy: 'The showroom is the catalogue. Try the sofa, the bed, the chair.' },
+  { title: 'Sit before you decide', copy: 'The showroom is the catalogue. Try the sofa, the cot, the table.' },
   { title: 'Wood and cloth', copy: 'Frames in solid wood. Seats in leather, linen, and velvet.' },
   { title: 'Ask on WhatsApp', copy: 'Send a room photo. We reply with size, fabric, and delivery.' },
 ]
@@ -16,7 +16,7 @@ export function About() {
         <p className="eyebrow">The showroom</p>
         <h2 className="section-title">A floor you can walk, not a catalogue you only scroll.</h2>
         <p className="section-lead">
-          Trendywoods keeps the range simple: sofas, beds, dining tables, and chairs.
+          Trendywoods keeps the range simple: sofas, cots, cushioning cots, and dining tables.
           Come in, or message the showroom and we will tell you what will actually fit.
         </p>
         <ul>
