@@ -26,9 +26,6 @@ export function Footer({ onAdmin }) {
           </button>
         </div>
       </div>
-      <p className="footer-note">
-        Demo showroom. Photos, prices, address, and phone number are placeholders.
-      </p>
     </footer>
   )
 }

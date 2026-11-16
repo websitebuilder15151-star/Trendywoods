@@ -1,17 +1,15 @@
-/** Dummy showroom data. Swap these values when the real shop details arrive. */
-
 export const shop = {
   name: 'Trendywoods',
-  phoneDisplay: '+91 79938 01036',
-  phoneTel: '+917993801036',
-  whatsappNumber: '917993801036',
+  phoneDisplay: '+91 83093 05161',
+  phoneTel: '+918309305161',
+  whatsappNumber: '918309305161',
   email: 'hello@trendywoods.example',
   address: {
-    line1: 'Trendywoods Showroom',
-    line2: '42 Residency Road',
-    city: 'Bengaluru, Karnataka 560025',
+    line1: 'Trendy Woods Furnitures',
+    line2: '7GRP+G7P, Badangpet - Nadargul Main Rd, near New Muncipal office, Libera Enclave',
+    city: 'Badangpet, Hyderabad, Telangana 500112',
   },
-  mapsUrl: 'https://maps.google.com/?q=Residency+Road+Bengaluru',
+  mapsUrl: 'https://maps.app.goo.gl/iuEz9oHt8W9WYpUy5',
   hours: [
     { days: 'Monday – Saturday', time: '10:00 AM – 8:00 PM' },
     { days: 'Sunday', time: '11:00 AM – 6:00 PM' },
