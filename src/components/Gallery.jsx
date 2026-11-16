@@ -3,6 +3,18 @@ import { categories, categoryLabel } from '../data/shop'
 import { sortStored } from '../lib/photos'
 import './Gallery.css'
 
+function shownName(name) {
+  const value = String(name || '').trim()
+  if (!value || value.toLowerCase() === 'new photo') return ''
+  return value
+}
+
+function shownAmount(price) {
+  const value = String(price || '').trim()
+  if (!value || /^on request$/i.test(value)) return ''
+  return value
+}
+
 export function Gallery({ category, stored, onCategory, onEnquire }) {
   const [active, setActive] = useState(null)
   const visible = sortStored(stored, category)
@@ -60,18 +72,30 @@ export function Gallery({ category, stored, onCategory, onEnquire }) {
           <p className="gallery-empty">No photos in this category yet.</p>
         ) : (
           <div className="piece-grid" role="tabpanel">
-            {visible.map((piece) => (
-              <button key={piece.id} className="piece" type="button" onClick={() => open(piece)}>
-                <span className="piece-photo">
-                  <img src={piece.image} alt={piece.alt} loading="lazy" />
-                </span>
-                <span className="piece-meta">
-                  <strong>{piece.name}</strong>
-                  <span>{piece.price}</span>
-                </span>
-                {piece.description ? <span className="piece-material">{piece.description}</span> : null}
-              </button>
-            ))}
+            {visible.map((piece) => {
+              const name = shownName(piece.name)
+              const amount = shownAmount(piece.price)
+              return (
+                <button
+                  key={piece.id}
+                  className="piece"
+                  type="button"
+                  aria-label={name || amount || 'Open photo'}
+                  onClick={() => open(piece)}
+                >
+                  <span className="piece-photo">
+                    <img src={piece.image} alt="" loading="lazy" />
+                  </span>
+                  {name || amount ? (
+                    <span className="piece-meta">
+                      {name ? <strong>{name}</strong> : null}
+                      {amount ? <span>{amount}</span> : null}
+                    </span>
+                  ) : null}
+                  {piece.description ? <span className="piece-material">{piece.description}</span> : null}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
@@ -82,13 +106,12 @@ export function Gallery({ category, stored, onCategory, onEnquire }) {
             className="detail"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="piece-title"
+            aria-label={`${categoryLabel(active.category)} photo`}
             onClick={(event) => event.stopPropagation()}
           >
-            <img src={active.image} alt={active.alt} />
+            <img src={active.image} alt="" />
             <div className="detail-copy">
               <p className="eyebrow">{categoryLabel(active.category)}</p>
-              <h3 id="piece-title">{active.name}</h3>
               {active.description ? <p>{active.description}</p> : null}
               <dl>
                 {active.size ? (

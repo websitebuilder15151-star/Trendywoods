@@ -104,6 +104,10 @@
   letter-spacing: -0.03em;
 }
 
+.piece-meta span {
+  margin-left: auto;
+}
+
 .piece-material {
   margin-top: 4px;
   color: var(--muted);
