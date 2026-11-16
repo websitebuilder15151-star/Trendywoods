@@ -30,6 +30,16 @@ export const categories = [
     blurb: 'Platform frames and upholstered beds for a quieter room.',
   },
   {
+    id: 'cots',
+    label: 'Cots',
+    blurb: 'Cots for a smaller room.',
+  },
+  {
+    id: 'cushion-cots',
+    label: 'Cushioning cots',
+    blurb: 'Cushioned cots with a softer top.',
+  },
+  {
     id: 'dining',
     label: 'Dining tables',
     blurb: 'Tables for four, six, and the long lunch that runs late.',
