@@ -3,17 +3,12 @@ export const shop = {
   phoneDisplay: '+91 83093 05161',
   phoneTel: '+918309305161',
   whatsappNumber: '918309305161',
-  email: 'hello@trendywoods.example',
   address: {
     line1: 'Trendy Woods Furnitures',
     line2: '7GRP+G7P, Badangpet - Nadargul Main Rd, near New Muncipal office, Libera Enclave',
     city: 'Badangpet, Hyderabad, Telangana 500112',
   },
   mapsUrl: 'https://maps.app.goo.gl/iuEz9oHt8W9WYpUy5',
-  hours: [
-    { days: 'Monday – Saturday', time: '10:00 AM – 8:00 PM' },
-    { days: 'Sunday', time: '11:00 AM – 6:00 PM' },
-  ],
 }
 
 export const categories = [

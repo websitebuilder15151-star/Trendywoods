@@ -1,7 +1,11 @@
-export function Logo() {
+export function Logo({ light = false }) {
   return (
-    <span className="logo">
-      <img src="/logo.png" alt="Trendy Woods Furnitures" />
+    <span className={`logo ${light ? 'logo-light' : ''}`}>
+      <img src="/logo.png" alt="" />
+      <span>
+        Trendy Woods
+        <small>Furnitures</small>
+      </span>
     </span>
   )
 }

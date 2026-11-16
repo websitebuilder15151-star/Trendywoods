@@ -33,22 +33,9 @@ export function Visit({ onEnquire }) {
             <a href={shop.mapsUrl}>Open in maps</a>
           </div>
           <div>
-            <h3>Hours</h3>
-            <ul>
-              {shop.hours.map((row) => (
-                <li key={row.days}>
-                  <span>{row.days}</span>
-                  <span>{row.time}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
             <h3>Contact</h3>
             <p>
               <a href={`tel:${shop.phoneTel}`}>{shop.phoneDisplay}</a>
-              <br />
-              <a href={`mailto:${shop.email}`}>{shop.email}</a>
             </p>
           </div>
         </div>

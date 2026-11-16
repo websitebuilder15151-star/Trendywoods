@@ -7,13 +7,12 @@ export function Footer({ onAdmin }) {
     <footer className="footer">
       <div className="container footer-grid">
         <div>
-          <Logo />
+          <Logo light />
           <p>Sofas, cots, cushioning cots, and dining tables.</p>
         </div>
         <div>
           <a href={chatWhatsAppUrl()}>WhatsApp</a>
           <a href={`tel:${shop.phoneTel}`}>{shop.phoneDisplay}</a>
-          <a href={`mailto:${shop.email}`}>{shop.email}</a>
         </div>
         <div>
           <p>

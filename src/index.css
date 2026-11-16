@@ -10,7 +10,7 @@
   --whatsapp: #1b7a43;
   --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
   --sans: 'Outfit', 'Avenir Next', 'Segoe UI', sans-serif;
-  --nav: 76px;
+  --nav: 92px;
   --shadow: 0 30px 70px rgba(36, 24, 12, 0.16);
   color-scheme: light;
 }
@@ -94,16 +94,40 @@ p {
 .logo {
   display: inline-flex;
   align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 560;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  text-align: left;
 }
 
 .logo img {
-  height: 60px;
+  height: 68px;
   width: auto;
   display: block;
 }
 
+.logo > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo small {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 480;
+  letter-spacing: 0;
+}
+
+.logo-light {
+  color: var(--cream);
+}
+
 .footer .logo img {
-  height: 96px;
+  height: 72px;
 }
 
 .container {
