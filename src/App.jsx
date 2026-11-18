@@ -9,7 +9,7 @@ import { Hero } from './components/Hero'
 import { Navbar } from './components/Navbar'
 import { Visit } from './components/Visit'
 import { WhatsAppFab } from './components/WhatsAppFab'
-import { fetchPhotos } from './lib/photos'
+import { fetchCovers, fetchPhotos } from './lib/photos'
 
 function isAdminPath(path) {
   return path === '/admin' || path === '/admin/'
@@ -18,6 +18,7 @@ function isAdminPath(path) {
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname)
   const [stored, setStored] = useState([])
+  const [covers, setCovers] = useState({})
   const [enquireOpen, setEnquireOpen] = useState(false)
   const [enquirePiece, setEnquirePiece] = useState(null)
   const [category, setCategory] = useState('sofas')
@@ -64,6 +65,11 @@ export default function App() {
     } catch {
       setStored([])
     }
+    try {
+      setCovers(await fetchCovers())
+    } catch {
+      setCovers({})
+    }
   }, [])
 
   useEffect(() => {
@@ -74,6 +80,7 @@ export default function App() {
     return (
       <Admin
         stored={stored}
+        covers={covers}
         onRefresh={refreshPhotos}
         onHome={() => navigate('/')}
       />
@@ -85,7 +92,7 @@ export default function App() {
       <Navbar onEnquire={() => openEnquire()} onNavigate={navigate} />
       <main>
         <Hero onEnquire={() => openEnquire()} onBrowse={() => openCategory('sofas')} />
-        <Collections stored={stored} onOpen={openCategory} />
+        <Collections stored={stored} covers={covers} onOpen={openCategory} />
         <About />
         <Gallery
           category={category}

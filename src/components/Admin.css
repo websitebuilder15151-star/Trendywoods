@@ -82,6 +82,34 @@
   margin-top: 10px;
 }
 
+.cover-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+  padding: 18px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+}
+
+.cover-panel h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 460;
+}
+
+.cover-panel p {
+  max-width: 40rem;
+  color: var(--muted);
+}
+
+.cover-current {
+  width: min(240px, 100%);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: var(--ink);
+}
+
 .admin-notice {
   margin-top: 14px;
   color: var(--moss);

@@ -32,6 +32,11 @@ export const categories = [
     label: 'Dining tables',
     blurb: 'Tables for four, six, and the long lunch that runs late.',
   },
+  {
+    id: 'general',
+    label: 'General',
+    blurb: 'Other pieces from the showroom.',
+  },
 ]
 
 export const pieces = [
@@ -121,20 +126,20 @@ export function categoryLabel(id) {
   return categories.find((category) => category.id === id)?.label || 'Piece'
 }
 
-export function buildWhatsAppUrl({ name, phone, piece, note }) {
-  const lines = [
-    `Hello ${shop.name}, I would like to ask about a piece.`,
-    '',
-    `Name: ${name}`,
-    `Phone: ${phone}`,
-    `Piece: ${piece}`,
-  ]
+export function enquiryText({ name, phone, note, photoUrl }) {
+  const lines = [`Hello ${shop.name}, I would like to ask about this piece.`, '']
 
+  if (photoUrl) lines.push(photoUrl, '')
+
+  lines.push(`Name: ${name}`, `Phone: ${phone}`)
   if (note?.trim()) lines.push(`Note: ${note.trim()}`)
-
   lines.push('', 'Please share availability and the next step.')
 
-  return `https://wa.me/${shop.whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`
+  return lines.join('\n')
+}
+
+export function buildWhatsAppUrl(text) {
+  return `https://wa.me/${shop.whatsappNumber}?text=${encodeURIComponent(text)}`
 }
 
 export function chatWhatsAppUrl() {

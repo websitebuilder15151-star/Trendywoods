@@ -1,18 +1,28 @@
 import { useEffect, useId, useState } from 'react'
-import { buildWhatsAppUrl, categoryLabel } from '../data/shop'
+import { buildWhatsAppUrl, categoryLabel, enquiryText } from '../data/shop'
 import './EnquireModal.css'
 
 const empty = { name: '', phone: '', pieceId: '', note: '' }
+
+function pieceOptionLabel(item, catalog) {
+  const name = item.name?.trim()
+  if (name && !/^new photo$/i.test(name)) return `${categoryLabel(item.category)} — ${name}`
+  const same = catalog.filter((entry) => entry.category === item.category)
+  const index = same.findIndex((entry) => entry.id === item.id)
+  return `${categoryLabel(item.category)} ${index + 1}`
+}
 
 export function EnquireModal({ open, piece, catalog, onClose }) {
   const titleId = useId()
   const [form, setForm] = useState(empty)
   const [errors, setErrors] = useState({})
+  const [photoFile, setPhotoFile] = useState(null)
 
   useEffect(() => {
     if (!open) return undefined
     setForm({ ...empty, pieceId: piece?.id || '' })
     setErrors({})
+    setPhotoFile(null)
     document.body.style.overflow = 'hidden'
     const onKey = (event) => {
       if (event.key === 'Escape') onClose()
@@ -24,13 +34,36 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
     }
   }, [open, piece, onClose])
 
+  useEffect(() => {
+    if (!open || !form.pieceId) return undefined
+    const item = catalog.find((entry) => entry.id === form.pieceId)
+    if (!item?.image) return undefined
+    const controller = new AbortController()
+    fetch(item.image, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error('Photo could not be loaded')
+        return response.blob()
+      })
+      .then((blob) => {
+        setPhotoFile({
+          id: item.id,
+          file: new File([blob], 'trendywoods-piece.jpg', { type: blob.type || 'image/jpeg' }),
+        })
+      })
+      .catch((error) => {
+        if (error.name === 'AbortError') return
+        setPhotoFile(null)
+      })
+    return () => controller.abort()
+  }, [open, form.pieceId, catalog])
+
   if (!open) return null
 
   const update = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
     const next = {}
     if (!form.name.trim()) next.name = 'Enter your name'
@@ -41,16 +74,29 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
     if (Object.keys(next).length) return
 
     const chosen = catalog.find((item) => item.id === form.pieceId)
-    const label = chosen ? `${chosen.name} (${categoryLabel(chosen.category)})` : 'A piece from the showroom'
-    const url = buildWhatsAppUrl({
+    const photoUrl = chosen?.image ? new URL(chosen.image, window.location.origin).href : ''
+    const details = {
       name: form.name.trim(),
       phone: form.phone.trim(),
-      piece: label,
       note: form.note,
-    })
+    }
+    const file = photoFile?.id === chosen?.id ? photoFile.file : null
+
+    if (file && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], text: enquiryText(details) })
+        onClose()
+        return
+      } catch (error) {
+        if (error?.name === 'AbortError') return
+      }
+    }
+
     onClose()
-    window.location.assign(url)
+    window.location.assign(buildWhatsAppUrl(enquiryText({ ...details, photoUrl })))
   }
+
+  const chosenPreview = catalog.find((item) => item.id === form.pieceId)
 
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
@@ -64,7 +110,7 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
         <header>
           <p className="eyebrow">WhatsApp</p>
           <h2 id={titleId}>Ask the showroom</h2>
-          <p>We will open WhatsApp with your note filled in. The shop confirms from there.</p>
+          <p>We will open WhatsApp with this photo and your note. The shop confirms from there.</p>
         </header>
         <form onSubmit={submit}>
           <label className="field">
@@ -79,11 +125,16 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
           </label>
           <label className="field">
             <span>Piece</span>
+            {chosenPreview ? (
+              <span className="piece-preview">
+                <img src={chosenPreview.image} alt="" />
+              </span>
+            ) : null}
             <select value={form.pieceId} onChange={update('pieceId')}>
               <option value="">Choose a piece</option>
               {catalog.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {categoryLabel(item.category)} — {item.name}
+                  {pieceOptionLabel(item, catalog)}
                 </option>
               ))}
             </select>

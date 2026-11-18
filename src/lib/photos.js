@@ -9,6 +9,12 @@ export async function fetchPhotos() {
   return response.json()
 }
 
+export async function fetchCovers() {
+  const response = await fetch('/api/covers')
+  if (!response.ok) throw new Error('Could not load cover photos')
+  return response.json()
+}
+
 export async function fetchSession() {
   const response = await fetch('/api/session')
   if (!response.ok) return false
@@ -64,6 +70,21 @@ export async function reorderPhotos(category, ids) {
     body: JSON.stringify({ category, ids }),
   })
   if (!response.ok) throw await readError(response, 'Could not save that order')
+  return response.json()
+}
+
+export async function uploadCover({ file, category }) {
+  const body = new FormData()
+  body.set('file', file)
+  body.set('category', category)
+  const response = await fetch('/api/covers', { method: 'POST', body })
+  if (!response.ok) throw await readError(response, 'Could not save that cover photo')
+  return response.json()
+}
+
+export async function deleteCover(category) {
+  const response = await fetch(`/api/covers/${category}`, { method: 'DELETE' })
+  if (!response.ok) throw await readError(response, 'Could not remove that cover photo')
   return response.json()
 }
 

@@ -1,6 +1,7 @@
-const CATEGORIES = new Set(['sofas', 'cots', 'cushion-cots', 'dining'])
+const CATEGORIES = new Set(['sofas', 'cots', 'cushion-cots', 'dining', 'general'])
 const MAX_BYTES = 8 * 1024 * 1024
 const CATALOG_KEY = 'catalog.json'
+const COVERS_KEY = 'covers.json'
 
 export default {
   async fetch(request, env) {
@@ -22,6 +23,24 @@ export default {
       if (url.pathname === '/api/photos' && request.method === 'GET') {
         const photos = await readCatalog(env.PHOTOS)
         return json(photos.map(toPublic))
+      }
+      if (url.pathname === '/api/covers' && request.method === 'GET') {
+        return json(toPublicCovers(await readCovers(env.PHOTOS)))
+      }
+      if (url.pathname === '/api/covers' && request.method === 'POST') {
+        if (!(await isAuthed(request, env))) return json({ error: 'Sign in again.' }, 401)
+        return uploadCover(request, env)
+      }
+
+      const coverFileMatch = url.pathname.match(/^\/api\/covers\/([a-z-]+)\/file$/)
+      if (coverFileMatch && request.method === 'GET') {
+        return readCoverFile(env, coverFileMatch[1])
+      }
+
+      const coverMatch = url.pathname.match(/^\/api\/covers\/([a-z-]+)$/)
+      if (coverMatch && request.method === 'DELETE') {
+        if (!(await isAuthed(request, env))) return json({ error: 'Sign in again.' }, 401)
+        return removeCover(env, coverMatch[1])
       }
       if (url.pathname === '/api/photos' && request.method === 'POST') {
         if (!(await isAuthed(request, env))) return json({ error: 'Sign in again.' }, 401)
@@ -227,6 +246,81 @@ function toPublic(photo) {
     image: `/api/photos/${photo.id}/file`,
     stored: true,
   }
+}
+
+async function uploadCover(request, env) {
+  let form
+  try {
+    form = await request.formData()
+  } catch {
+    return json({ error: 'Choose a cover photo to upload.' }, 400)
+  }
+
+  const category = String(form.get('category') || '')
+  if (!CATEGORIES.has(category)) return json({ error: 'Choose a category.' }, 400)
+
+  const file = form.get('file')
+  if (!file || typeof file.arrayBuffer !== 'function') return json({ error: 'Choose a cover photo.' }, 400)
+  if (file.size > MAX_BYTES) return json({ error: 'That photo is too large. Use one under 8 MB.' }, 400)
+  if (!String(file.type || '').startsWith('image/')) return json({ error: 'That file is not a photo.' }, 400)
+
+  const objectKey = `covers/${category}.jpg`
+  const bytes = await file.arrayBuffer()
+  await env.PHOTOS.put(objectKey, bytes, {
+    httpMetadata: { contentType: 'image/jpeg' },
+  })
+
+  const covers = await readCovers(env.PHOTOS)
+  covers[category] = { objectKey, updatedAt: new Date().toISOString() }
+  await writeCovers(env.PHOTOS, covers)
+  return json(toPublicCovers(covers))
+}
+
+async function removeCover(env, category) {
+  if (!CATEGORIES.has(category)) return json({ error: 'Choose a category.' }, 400)
+  const covers = await readCovers(env.PHOTOS)
+  const current = covers[category]
+  if (current?.objectKey) await env.PHOTOS.delete(current.objectKey)
+  delete covers[category]
+  await writeCovers(env.PHOTOS, covers)
+  return json(toPublicCovers(covers))
+}
+
+async function readCoverFile(env, category) {
+  if (!CATEGORIES.has(category)) return json({ error: 'Photo not found' }, 404)
+  const covers = await readCovers(env.PHOTOS)
+  const cover = covers[category]
+  if (!cover?.objectKey) return json({ error: 'Photo not found' }, 404)
+  const object = await env.PHOTOS.get(cover.objectKey)
+  if (!object) return json({ error: 'Photo not found' }, 404)
+  return new Response(object.body, {
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Cache-Control': 'public, max-age=86400',
+    },
+  })
+}
+
+function toPublicCovers(covers) {
+  const out = {}
+  for (const [category, cover] of Object.entries(covers)) {
+    if (!CATEGORIES.has(category) || !cover?.updatedAt) continue
+    out[category] = `/api/covers/${category}/file?v=${encodeURIComponent(cover.updatedAt)}`
+  }
+  return out
+}
+
+async function readCovers(bucket) {
+  const object = await bucket.get(COVERS_KEY)
+  if (!object) return {}
+  const data = await object.json()
+  return data && typeof data === 'object' && !Array.isArray(data) ? data : {}
+}
+
+async function writeCovers(bucket, covers) {
+  await bucket.put(COVERS_KEY, JSON.stringify(covers), {
+    httpMetadata: { contentType: 'application/json' },
+  })
 }
 
 async function readCatalog(bucket) {

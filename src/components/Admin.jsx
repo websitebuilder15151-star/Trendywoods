@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { categories, categoryLabel } from '../data/shop'
 import { shrinkImage } from '../lib/images'
-import { deletePhoto, fetchSession, login, logout, reorderPhotos, sortStored, updatePhoto, uploadPhoto } from '../lib/photos'
+import { deleteCover, deletePhoto, fetchSession, login, logout, reorderPhotos, sortStored, updatePhoto, uploadCover, uploadPhoto } from '../lib/photos'
 import { Logo } from './Logo'
 import './Admin.css'
 
 const emptyEdit = { name: '', description: '', price: '' }
 
-export function Admin({ stored, onRefresh, onHome }) {
+export function Admin({ stored, covers = {}, onRefresh, onHome }) {
   const fileRef = useRef(null)
+  const coverRef = useRef(null)
   const [authed, setAuthed] = useState(false)
   const [ready, setReady] = useState(false)
   const [password, setPassword] = useState('')
@@ -16,11 +17,13 @@ export function Admin({ stored, onRefresh, onHome }) {
   const [category, setCategory] = useState('sofas')
   const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  const [coverBusy, setCoverBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [files, setFiles] = useState([])
+  const [coverFile, setCoverFile] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [edit, setEdit] = useState(emptyEdit)
   const [preview, setPreview] = useState(null)
@@ -34,6 +37,8 @@ export function Admin({ stored, onRefresh, onHome }) {
   useEffect(() => {
     setEditingId(null)
     setPreview(null)
+    setCoverFile(null)
+    if (coverRef.current) coverRef.current.value = ''
   }, [category])
 
   useEffect(() => {
@@ -109,6 +114,42 @@ export function Admin({ stored, onRefresh, onHome }) {
     } finally {
       setBusy(false)
       setUploading(false)
+    }
+  }
+
+  const saveCover = async (event) => {
+    event.preventDefault()
+    if (!coverFile) {
+      setError('Choose a cover photo, then press Save cover.')
+      return
+    }
+    setCoverBusy(true)
+    setError('')
+    try {
+      const shrunk = await shrinkImage(coverFile)
+      await uploadCover({ file: shrunk, category })
+      await onRefresh()
+      setCoverFile(null)
+      if (coverRef.current) coverRef.current.value = ''
+      setNotice('Cover photo saved.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCoverBusy(false)
+    }
+  }
+
+  const clearCover = async () => {
+    setCoverBusy(true)
+    setError('')
+    try {
+      await deleteCover(category)
+      await onRefresh()
+      setNotice('Cover photo removed.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCoverBusy(false)
     }
   }
 
@@ -261,9 +302,49 @@ export function Admin({ stored, onRefresh, onHome }) {
           {notice ? <p className="admin-notice">{notice}</p> : null}
           {error ? <p className="field-error">{error}</p> : null}
 
+          <form className="cover-panel" onSubmit={saveCover}>
+            <div>
+              <h2>Cover photo</h2>
+              <p>
+                This is the large picture visitors see for {categoryLabel(category)} on the floor. It does not appear in the photo list.
+              </p>
+            </div>
+            {covers[category] ? (
+              <img className="cover-current" src={covers[category]} alt="" />
+            ) : (
+              <p className="upload-hint">No cover yet. Until you add one, the floor uses the first photo in this category.</p>
+            )}
+            <label className="field file-field">
+              <span>New cover</span>
+              <input
+                ref={coverRef}
+                type="file"
+                accept="image/*"
+                disabled={busy || coverBusy}
+                onChange={(event) => {
+                  const picked = [...event.target.files].find((file) => file.type.startsWith('image/')) || null
+                  setCoverFile(picked)
+                  setError('')
+                  setNotice('')
+                }}
+              />
+            </label>
+            <p className="upload-hint">{coverFile ? `Chosen: ${coverFile.name}` : 'No cover chosen yet. Choosing a photo does not save it.'}</p>
+            <div className="order-edit-actions">
+              <button className="btn btn-ink" type="submit" disabled={busy || coverBusy}>
+                {coverBusy ? 'Saving…' : 'Save cover'}
+              </button>
+              {covers[category] ? (
+                <button className="btn btn-line" type="button" onClick={clearCover} disabled={busy || coverBusy}>
+                  Remove cover
+                </button>
+              ) : null}
+            </div>
+          </form>
+
           <section className="order-list" aria-label={`${categoryLabel(category)} photos`}>
             <h2>{categoryLabel(category)}</h2>
-            <p className="order-lead">Photo 1 is the first one visitors see. Move a photo up or down to change that. Click a photo to see it larger.</p>
+            <p className="order-lead">Photo 1 is the first one in this category. Move a photo up or down to change the order. Click a photo to see it larger.</p>
             {saved.length === 0 ? <p className="order-empty">No photos in this category yet.</p> : null}
             {saved.map((piece, index) => (
               <article key={piece.id} className="order-card">

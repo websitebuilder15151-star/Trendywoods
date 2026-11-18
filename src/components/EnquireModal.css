@@ -36,6 +36,21 @@
   margin-top: 22px;
 }
 
+.piece-preview {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: rgba(28, 25, 21, 0.06);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.piece-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .modal-actions {
   display: flex;
   flex-wrap: wrap;
