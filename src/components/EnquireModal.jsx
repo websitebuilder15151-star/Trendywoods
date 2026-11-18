@@ -16,13 +16,11 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
   const titleId = useId()
   const [form, setForm] = useState(empty)
   const [errors, setErrors] = useState({})
-  const [photoFile, setPhotoFile] = useState(null)
 
   useEffect(() => {
     if (!open) return undefined
     setForm({ ...empty, pieceId: piece?.id || '' })
     setErrors({})
-    setPhotoFile(null)
     document.body.style.overflow = 'hidden'
     const onKey = (event) => {
       if (event.key === 'Escape') onClose()
@@ -34,36 +32,13 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
     }
   }, [open, piece, onClose])
 
-  useEffect(() => {
-    if (!open || !form.pieceId) return undefined
-    const item = catalog.find((entry) => entry.id === form.pieceId)
-    if (!item?.image) return undefined
-    const controller = new AbortController()
-    fetch(item.image, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error('Photo could not be loaded')
-        return response.blob()
-      })
-      .then((blob) => {
-        setPhotoFile({
-          id: item.id,
-          file: new File([blob], 'trendywoods-piece.jpg', { type: blob.type || 'image/jpeg' }),
-        })
-      })
-      .catch((error) => {
-        if (error.name === 'AbortError') return
-        setPhotoFile(null)
-      })
-    return () => controller.abort()
-  }, [open, form.pieceId, catalog])
-
   if (!open) return null
 
   const update = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
-  const submit = async (event) => {
+  const submit = (event) => {
     event.preventDefault()
     const next = {}
     if (!form.name.trim()) next.name = 'Enter your name'
@@ -75,25 +50,17 @@ export function EnquireModal({ open, piece, catalog, onClose }) {
 
     const chosen = catalog.find((item) => item.id === form.pieceId)
     const photoUrl = chosen?.image ? new URL(chosen.image, window.location.origin).href : ''
-    const details = {
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      note: form.note,
-    }
-    const file = photoFile?.id === chosen?.id ? photoFile.file : null
-
-    if (file && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], text: enquiryText(details) })
-        onClose()
-        return
-      } catch (error) {
-        if (error?.name === 'AbortError') return
-      }
-    }
-
     onClose()
-    window.location.assign(buildWhatsAppUrl(enquiryText({ ...details, photoUrl })))
+    window.location.assign(
+      buildWhatsAppUrl(
+        enquiryText({
+          name: form.name.trim(),
+          phone: form.phone.trim(),
+          note: form.note,
+          photoUrl,
+        }),
+      ),
+    )
   }
 
   const chosenPreview = catalog.find((item) => item.id === form.pieceId)
